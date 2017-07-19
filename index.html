@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>ipanel微信支付相关测试</title>
+    <style>
+        div {
+            margin-left: 0;
+            float: left;
+            text-align: center;
+            font-size: 30px;
+        }
+        input {
+            display: block;
+            float: left;
+        }
+        .jsapi,.orderQuery,.refund,.refundQuery{
+            width: 100%;
+        }
+        .jsapi {
+            background-color: green;
+        }
+        .orderQuery {
+            background-color: blue;
+        }
+        .orderQuery div,.refund div,.refundQuery div{
+            font-size: 20px;
+        }
+        .refund {
+            background-color: red;
+        }
+        .refundQuery {
+            background-color: orange;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // 获取openid，通过WXgetopenid.php中转获得
+        var parm = window.location.href;
+        if ( parm.split('openid')[1] == undefined) {
+            location.href = 'http://apps.homed.me/payTest/example/WXgetopenid.php';
+        }
+        var openid = parm.split('openid=')[1];
+        console.log(openid);
+    </script>
+    <div class="jsapi">
+        点击jsapi付款(1分)
+    </div>
+    <div class="orderQuery">
+        <div>
+            <div>微信单号</div>
+            <input type="text" id="orderQueryTransaction_id">
+        </div>
+        <div>
+            <div>商户单号</div>
+            <input type="text" id="orderQueryOut_trade_no">
+        </div>
+        <button id="orderQueryBtn">订单查询</button>
+    </div>
+    <div class="refund">
+        <div>
+            <div>微信单号</div>
+            <input type="text" id="refundTtransaction_id">
+        </div>
+        <div>
+            <div>商户单号</div>
+            <input type="text" id="refundOut_trade_no">
+        </div>
+        <div>
+            <div>订单金额</div>
+            <input type="text" id="refundTotal_fee">
+        </div>
+        <div>
+            <div>退款金额</div>
+            <input type="text" id="refundRefund_fee">
+        </div>
+        <button id="refundBtn">退款申请</button>
+    </div>
+    <div class="refundQuery">
+        <div>
+            <div>微信单号</div>
+            <input type="text" id="refundQueryTransaction_id">
+        </div>
+        <div>
+            <div>商户单号</div>
+            <input type="text" id="refundQueryOut_trade_no">
+        </div>
+        <button id="refundQueryBtn">退款查询</button>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.xml2json.js"></script>
+    <script src="js/WXPay.js"></script>
+    <script>
+        // 支付测试
+        $('.jsapi').bind('click', function () {
+            WXPay.WXjsapiPay( openid, '测试商品', 1);
+        });
+        // 支付订单查询测试
+        $('#orderQueryBtn').bind('click', function () {
+            if ($('#orderQueryTransaction_id').val() != '') {
+                WXPay.WXorderquery('transaction_id',$('#orderQueryTransaction_id').val());
+            } else if ($('#orderQueryOut_trade_no').val() != '') {
+                WXPay.WXorderquery('out_trade_no',$('#orderQueryOut_trade_no').val());
+            } else {
+                alert('微信单号和商户单号必须输入至少一个');
+            }
+        });
+        // 退款测试
+        $('#refundBtn').bind('click', function () {
+            if ($('#refundTotal_fee').val() != '' && $('#refundRefund_fee').val() != '') {
+                if ($('#refundTtransaction_id').val() != '') {
+                    console.log($('#refundTtransaction_id').val());
+                    WXPay.WXrefund( 'transaction_id', $('#refundTtransaction_id').val(), $('#refundTotal_fee').val(), $('#refundRefund_fee').val());
+                } else if ($('#refundOut_trade_no').val() != '') {
+                    console.log($('#refundOut_trade_no').val());
+                    WXPay.WXrefund( 'out_trade_no', $('#refundOut_trade_no').val(), $('#refundTotal_fee').val(), $('#refundRefund_fee').val());
+                } else {
+                    alert('微信单号和商户单号必须输入至少一个');
+                }
+            } else {
+                alert('必须输入退款金额和总金额');
+            }
+        });
+        // 退款结果查询测试
+        $('#refundQueryBtn').bind('click', function () {
+            if ($('#refundQueryTransaction_id').val() != '') {
+                WXPay.WXrefundquery('transaction_id',$('#refundQueryTransaction_id').val());
+            } else if ($('#refundQueryOut_trade_no').val() != '') {
+                WXPay.WXrefundquery('out_trade_no',$('#refundQueryOut_trade_no').val());
+            } else {
+                alert('微信单号和商户单号必须输入至少一个');
+            }
+        });
+
+    </script>
+</body>
+</html>
